@@ -80,7 +80,7 @@ for epoch in range(epochs):
     number = random.choice(choices_number[letter])
     one_hot_letter = generate_one_hot(letter, choices_letter)
 
-    scieszka = fr"C:\Users\adrian\PycharmProjects\NeuralN\classification\{letter}{number}"
+    scieszka = fr"classification\{letter}{number}"
     # Pobranie listy plików .jpg w folderze
     files = os.listdir(scieszka)
     jpg_files = [f for f in files if f.endswith('.jpg')]
