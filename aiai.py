@@ -1,5 +1,3 @@
-#from unittest.mock import MagicMixin # zrobić zapisywanie wag
-
 from PIL import Image
 import numpy as np
 import math
@@ -38,21 +36,34 @@ def activaction_relu(data: object) -> object:
     return data
 
 
-
-
-
 X = np.zeros(3072, dtype=np.float32)
-waga_0 = np.random.randn(8, 3072) * np.sqrt(2 / 3072)#waga_0 = np.random.uniform(-1, 1, (8, 3072))
-waga_0 = np.round(waga_0, 2)
-waga_1 = np.random.randn(8, 8) * np.sqrt(2 / 8)#waga_1 = np.random.uniform(-1, 1, (8, 8))
-waga_1 = np.round(waga_1, 2)
-waga_2 = np.random.randn(4, 8) * np.sqrt(2 / 8)#waga_2 = np.random.uniform(-1, 1, (4, 8))
-waga_2 = np.round(waga_2, 2)
-bias_0 = np.zeros(8)  # Bias dla warstwy pierwszej
-bias_1 = np.zeros(8)  # Bias dla warstwy drugiej
-bias_2 = np.zeros(4)  # Bias dla warstwy wyjściowej
+file = "waga_bias.npz"
+if os.path.exists(file):
+    zapisane_macierze = np.load(file)
+    waga_0 = zapisane_macierze["matrix0"]
+    waga_1 = zapisane_macierze["matrix1"]
+    waga_2 = zapisane_macierze["matrix2"]
+    bias_0 = zapisane_macierze["matrix3"]
+    bias_1 = zapisane_macierze["matrix4"]
+    bias_2 = zapisane_macierze["matrix5"]
+    zapisane_macierze.close()  # Zamknięcie pliku
+    print("Wczytano dane z pliku")
+    print(bias_0)
+else:
+    waga_0 = np.random.randn(8, 3072) * np.sqrt(2 / 3072)#waga_0 = np.random.uniform(-1, 1, (8, 3072))
+    waga_0 = np.round(waga_0, 2)
+    waga_1 = np.random.randn(8, 8) * np.sqrt(2 / 8)#waga_1 = np.random.uniform(-1, 1, (8, 8))
+    waga_1 = np.round(waga_1, 2)
+    waga_2 = np.random.randn(4, 8) * np.sqrt(2 / 8)#waga_2 = np.random.uniform(-1, 1, (4, 8))
+    waga_2 = np.round(waga_2, 2)
+    bias_0 = np.zeros(8)  # Bias dla warstwy pierwszej
+    bias_1 = np.zeros(8)  # Bias dla warstwy drugiej
+    bias_2 = np.zeros(4)  # Bias dla warstwy wyjściowej
+    print("Utworzono nowe dane")
 
-learning_rate = 0.00001
+
+
+learning_rate = 0.01
 epochs = 20000  # Liczba epok
 choices_letter = ['A', 'B', 'C', 'D']  # Pierwszy przedział
 choices_number = {'A': [1, 2, 7,21,30],      # Drugi przedział zależny od pierwszego
@@ -114,7 +125,6 @@ for epoch in range(epochs):
         hidden[a][0] = np.dot(waga_0[a], X) + bias_0[a]  # Obliczanie wartości dla hidden
         active_0[a] = activaction_relu(hidden[a][0])  # Przekształcanie przez funkcję aktywacji
 
-
     b:int = 0
     for b in range(8):
         hidden[b][1] = np.dot(waga_1[b], active_0) + bias_1[b]
@@ -139,7 +149,6 @@ for epoch in range(epochs):
     #Wsteczna propagacja , albo to co próbuje zrobić
     # Obliczanie gradientów wstecznej propagacji
     Gradien = end_value - one_hot_letter  # Gradient błędu warstwy wyjściowej
-
 
 
     # Gradient dla warstwy wyjściowej
@@ -182,6 +191,13 @@ for epoch in range(epochs):
         dobrze += 1
     calosc += 1
 
+    if epoch == epochs/2:
+        learning_rate = learning_rate/10
+        print("learning rate został zmniejszony")
+
     print(f"{dobrze}/{calosc}")
     print("--------------------------------")
 
+np.savez("waga_bias.npz", matrix0=waga_0, matrix1=waga_1,matrix2=waga_2, matrix3=bias_0,matrix4=bias_1,matrix5=bias_2)
+print(dobrze/calosc)
+print("Dane powinny zostać zapisane")
